@@ -192,9 +192,7 @@ public abstract class ConceptBrowserDataSource<T extends Concept> {
     }
     
     public abstract OAFRecentlyOpenedFileManager getRecentlyOpenedAuditSets();
-    
     public abstract OAFRecentlyOpenedFileManager getRecentlyOpenedWorkspaces();
-    
     
     /**
      * Returns the unique identifier of the given ontology

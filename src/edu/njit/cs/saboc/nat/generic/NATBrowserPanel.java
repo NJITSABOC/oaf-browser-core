@@ -1,6 +1,7 @@
 package edu.njit.cs.saboc.nat.generic;
 
 import edu.njit.cs.saboc.blu.core.ontology.Concept;
+import edu.njit.cs.saboc.blu.core.utils.toolstate.OAFStateFileManager;
 import edu.njit.cs.saboc.nat.generic.data.ConceptBrowserDataSource;
 import edu.njit.cs.saboc.nat.generic.errorreport.AuditDatabase;
 import edu.njit.cs.saboc.nat.generic.errorreport.AuditSet;
@@ -33,6 +34,8 @@ public class NATBrowserPanel<T extends Concept> extends JPanel {
     private final FocusConceptManager<T> focusConceptManager;
     
     private final JFrame parentFrame;
+    
+    private final OAFStateFileManager stateFileManager;
      
     private final NATLayout<T> layout;
     
@@ -44,16 +47,20 @@ public class NATBrowserPanel<T extends Concept> extends JPanel {
     
     private final ArrayList<DataSourceChangeListener<T>> dataSourceChangeListeners;
     
-    public NATBrowserPanel(JFrame parentFrame, NATLayout layout) {
-        
-        this.setLayout(new BorderLayout());
-               
+    public NATBrowserPanel(
+            JFrame parentFrame, 
+            OAFStateFileManager stateFileManager,
+            NATLayout layout) {
+
         this.optDataSource = Optional.empty();
         
         this.parentFrame = parentFrame;
+        this.stateFileManager = stateFileManager;
         
         this.layout = layout;
-        
+                
+        this.setLayout(new BorderLayout());
+                      
         this.add(layout, BorderLayout.CENTER);    
         
         this.focusConceptManager = new FocusConceptManager<>(this);
@@ -98,6 +105,10 @@ public class NATBrowserPanel<T extends Concept> extends JPanel {
         this.dataSourceChangeListeners.forEach((listener) -> {
             listener.dataSourceRemoved();
         });
+    }
+    
+    public OAFStateFileManager getStateFileManager() {
+        return stateFileManager;
     }
     
     public Optional<ConceptBrowserDataSource<T>> getDataSource() {

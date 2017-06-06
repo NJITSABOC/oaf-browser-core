@@ -10,6 +10,7 @@ import edu.njit.cs.saboc.nat.generic.FocusConceptManager;
 import edu.njit.cs.saboc.nat.generic.NATBrowserPanel;
 import edu.njit.cs.saboc.nat.generic.gui.panels.BaseNATPanel;
 import edu.njit.cs.saboc.nat.generic.gui.panels.focusconcept.EditFocusConceptPanel.EditFocusConceptListener;
+import edu.njit.cs.saboc.nat.generic.gui.panels.focusconcept.linkeddata.BioPortalSearchConfig;
 import edu.njit.cs.saboc.nat.generic.gui.panels.focusconcept.linkeddata.GoogleSearchConfig;
 import edu.njit.cs.saboc.nat.generic.gui.panels.focusconcept.linkeddata.OpenBrowserButton;
 import edu.njit.cs.saboc.nat.generic.gui.panels.focusconcept.linkeddata.PubMedSearchConfig;
@@ -50,24 +51,27 @@ import javax.swing.ToolTipManager;
  */
 public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
     
-    private JEditorPane jtf;
+    private final JEditorPane editorPane;
     
-    private JButton backButton;
-    private JButton forwardButton;
+    private final JButton backButton;
+    private final JButton forwardButton;
     
-    private EditFocusConceptPanel editFocusConceptPanel;
+    private final EditFocusConceptPanel editFocusConceptPanel;
 
     private FocusConceptHistory<T> history;
     
-    private JPanel optionsPanel;
+    private final JPanel optionsPanel;
     
-    private JPanel focusConceptPanel;
+    private final JPanel focusConceptPanel;
     
     private final ArrayList<JButton> optionButtons = new ArrayList<>();
         
-    private boolean pending = false;
-    
     private final EntityRightClickManager<T> rightClickManager = new EntityRightClickManager<>();
+    
+    private final NATWorkspaceButton workspaceBtn;
+    
+    // In the middle of loading a concept?
+    private boolean pending = false;
 
     public FocusConceptPanel(NATBrowserPanel<T> mainPanel) {
         
@@ -138,7 +142,7 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
             }
         });
 
-        jtf = new JEditorPane() {
+        editorPane = new JEditorPane() {
             
             @Override
             public String getToolTipText(MouseEvent evt) {
@@ -150,10 +154,10 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
                 if(!editFocusConceptPanel.isVisible()) {
                     
                     Rectangle conceptRect = new Rectangle(
-                            jtf.getX(),
-                            jtf.getY(),
-                            jtf.getWidth(),
-                            jtf.getPreferredSize().height);
+                            editorPane.getX(),
+                            editorPane.getY(),
+                            editorPane.getWidth(),
+                            editorPane.getPreferredSize().height);
                     
                     if(!conceptRect.contains(evt.getPoint())) {
                         return null;
@@ -177,7 +181,7 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
             
         };
         
-        editFocusConceptPanel = new EditFocusConceptPanel(this, jtf);
+        editFocusConceptPanel = new EditFocusConceptPanel(this, editorPane);
         editFocusConceptPanel.addEditFocusConceptListener(new EditFocusConceptListener() {
 
             @Override
@@ -194,10 +198,10 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
             }
         });
 
-        jtf.setFont(jtf.getFont().deriveFont(Font.PLAIN, 14f));
+        editorPane.setFont(editorPane.getFont().deriveFont(Font.PLAIN, 14f));
         
-        JScrollPane pane = new JScrollPane(jtf);
-        ToolTipManager.sharedInstance().registerComponent(jtf);
+        JScrollPane pane = new JScrollPane(editorPane);
+        ToolTipManager.sharedInstance().registerComponent(editorPane);
         pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         JPanel alignmentPanel = new JPanel(new BorderLayout());
@@ -211,7 +215,7 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
         add(alignmentPanel, BorderLayout.NORTH);
         add(focusConceptPanel, BorderLayout.CENTER);
         
-        jtf.addKeyListener(new KeyAdapter() {
+        editorPane.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 
@@ -220,18 +224,18 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
                         setConcept();
                         e.consume();
                     } else if((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != InputEvent.CTRL_DOWN_MASK
-                            && !e.isActionKey() && !jtf.isEditable()) {
+                            && !e.isActionKey() && !editorPane.isEditable()) {
                         
                         openEditorPane();
                         
                     } else if((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK
                             && e.getKeyCode() == KeyEvent.VK_V
-                            && !jtf.isEditable()) {
+                            && !editorPane.isEditable()) {
                         
                         openEditorPane();
                         
                     } else if(e.getKeyCode() == KeyEvent.VK_ESCAPE
-                            && jtf.isEditable()) {
+                            && editorPane.isEditable()) {
                         
                         if(!pending) {
                             editFocusConceptPanel.setVisible(false);
@@ -242,13 +246,13 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
             }
         });
 
-        jtf.addMouseListener(new MouseAdapter() {
+        editorPane.addMouseListener(new MouseAdapter() {
             
             @Override
             public void mouseClicked(MouseEvent e) {
                 if(!pending && e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
                     
-                    if(!jtf.isEditable() ){
+                    if(!editorPane.isEditable() ){
                         openEditorPane();
                     } else{
                         editFocusConceptPanel.setVisible(false);
@@ -266,7 +270,7 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
             }
         });
         
-        jtf.setContentType("text/html");
+        editorPane.setContentType("text/html");
         
         mainPanel.getFocusConceptManager().addFocusConceptListener( (concept) -> {
             display();
@@ -275,16 +279,25 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
         this.addOptionButton(new OpenBrowserButton(mainPanel, new GoogleSearchConfig()));
         this.addOptionButton(new OpenBrowserButton(mainPanel, new WikipediaSearchConfig()));
         this.addOptionButton(new OpenBrowserButton(mainPanel, new PubMedSearchConfig()));
+        this.addOptionButton(new OpenBrowserButton(mainPanel, new BioPortalSearchConfig()));
         
-        this.addOptionButton(new NATWorkspaceButton(mainPanel));
+        this.workspaceBtn = new NATWorkspaceButton(mainPanel);
+        
+        if(!mainPanel.getStateFileManager().isInitialized()) {
+            workspaceBtn.setEnabled(false);
+            workspaceBtn.setToolTipText("Concept browser workspaces not available "
+                    + "(AppData not available)");
+        }
+        
+        this.addOptionButton(workspaceBtn);
         
         this.setRightClickMenuGenerator(new FocusConceptRightClickMenu(mainPanel));
     }
 
     private void setConcept() {
         
-        if(jtf.isEditable()) {
-            doConceptChange(jtf.getText());
+        if(editorPane.isEditable()) {
+            doConceptChange(editorPane.getText());
         }
 
         editFocusConceptPanel.setVisible(false);
@@ -303,7 +316,7 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
             return;
         }
         
-        jtf.setContentType("text/html");
+        editorPane.setContentType("text/html");
         
         editFocusConceptPanel.setVisible(false);
 
@@ -311,13 +324,13 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
         
         String conceptString = getMainPanel().getDataSource().get().getFocusConceptText(fc);
                 
-        jtf.setText(conceptString);
+        editorPane.setText(conceptString);
         
-        jtf.setToolTipText(conceptString);
+        editorPane.setToolTipText(conceptString);
 
-        jtf.setCaretPosition(0);
-        jtf.getCaret().setVisible(false);
-        jtf.setEditable(false);
+        editorPane.setCaretPosition(0);
+        editorPane.getCaret().setVisible(false);
+        editorPane.setEditable(false);
         
         editFocusConceptPanel.clearEdits();
         
@@ -367,13 +380,13 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
     public void openEditorPane() {
         T activeFC = getMainPanel().getFocusConceptManager().getActiveFocusConcept();
         
-        jtf.setContentType("text/plain");
-        jtf.setFont(jtf.getFont().deriveFont(Font.BOLD));
-        jtf.setText(activeFC.getName());
+        editorPane.setContentType("text/plain");
+        editorPane.setFont(editorPane.getFont().deriveFont(Font.BOLD));
+        editorPane.setText(activeFC.getName());
         
-        jtf.selectAll();
-        jtf.setEditable(true);
-        jtf.getCaret().setVisible(true);
+        editorPane.selectAll();
+        editorPane.setEditable(true);
+        editorPane.getCaret().setVisible(true);
         
         editFocusConceptPanel.setVisible(true);
         editFocusConceptPanel.update();
@@ -381,11 +394,11 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
     }
 
     public void dataEmpty() {
-        jtf.setContentType("text/html");
+        editorPane.setContentType("text/html");
         
         editFocusConceptPanel.setVisible(false);
-        jtf.setFont(jtf.getFont().deriveFont(Font.BOLD));
-        jtf.setText("Please enter a valid concept.");
+        editorPane.setFont(editorPane.getFont().deriveFont(Font.BOLD));
+        editorPane.setText("Please enter a valid concept.");
     }
     
     public void showRecentHistoryMenu(
@@ -445,7 +458,7 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
         
         super.setEnabled(value);
         
-        this.jtf.setEnabled(value);
+        this.editorPane.setEnabled(value);
     
         if (value) {
             enableNavigationButtons();
@@ -459,6 +472,22 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
         optionButtons.forEach( (button) -> {
             button.setEnabled(value);
         });
+        
+        boolean workspacesEnabled = false;
+        
+        if(value) {
+            
+            NATBrowserPanel<T> mainPanel = this.getMainPanel();
+            
+            if(mainPanel.getStateFileManager().isInitialized() && 
+                    mainPanel.getDataSource().isPresent() && 
+                    mainPanel.getDataSource().get().getRecentlyOpenedWorkspaces() != null) {
+                
+                workspacesEnabled = true;
+            }
+        }
+        
+        workspaceBtn.setEnabled(workspacesEnabled);
     }
 
     @Override

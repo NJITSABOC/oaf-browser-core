@@ -11,10 +11,9 @@ import edu.njit.cs.saboc.nat.generic.errorreport.AuditSet;
 import edu.njit.cs.saboc.nat.generic.errorreport.AuditSetLoader;
 import edu.njit.cs.saboc.nat.generic.errorreport.AuditSetLoaderException;
 import edu.njit.cs.saboc.nat.generic.gui.panels.BaseNATPanel;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,7 +58,6 @@ public class AuditSetPanel<T extends Concept> extends BaseNATPanel<T> {
         
         JPanel managementPanel = new JPanel();
         
-        
         this.btnCreateAuditSet = new JButton("New");
         this.btnCreateAuditSet.addActionListener((ae) -> {
             
@@ -101,7 +99,10 @@ public class AuditSetPanel<T extends Concept> extends BaseNATPanel<T> {
             
             Optional<ConceptBrowserDataSource<T>> optDataSource = browserPanel.getDataSource();
             
-            if(optDataSource.isPresent() && optDataSource.get().getRecentlyOpenedAuditSets() != null) {
+            if(optDataSource.isPresent() && 
+                    browserPanel.getStateFileManager().isInitialized() && 
+                    optDataSource.get().getRecentlyOpenedAuditSets() != null) {
+                
                 OAFRecentlyOpenedFileManager recentAuditSetManager = optDataSource.get().getRecentlyOpenedAuditSets();
                 
                 if(!recentAuditSetManager.getRecentlyOpenedFiles().isEmpty()) {

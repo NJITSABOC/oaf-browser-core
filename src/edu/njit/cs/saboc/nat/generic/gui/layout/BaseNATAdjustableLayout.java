@@ -46,7 +46,7 @@ public abstract class BaseNATAdjustableLayout<T extends Concept> extends NATLayo
         
         JSplitPane rightPane = BaseNATAdjustableLayout.createStyledSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         
-        rightPane.setDividerLocation(450);
+        rightPane.setDividerLocation(500);
         rightPane.setLeftComponent(midPanel);
         rightPane.setRightComponent(rightPanel);
         

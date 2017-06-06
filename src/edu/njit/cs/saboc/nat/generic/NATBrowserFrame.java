@@ -1,6 +1,7 @@
 package edu.njit.cs.saboc.nat.generic;
 
 import edu.njit.cs.saboc.blu.core.ontology.Concept;
+import edu.njit.cs.saboc.blu.core.utils.toolstate.OAFStateFileManager;
 import edu.njit.cs.saboc.nat.generic.data.ConceptBrowserDataSource;
 import edu.njit.cs.saboc.nat.generic.gui.layout.NATLayout;
 import javax.swing.JFrame;
@@ -19,7 +20,8 @@ public class NATBrowserFrame<T extends Concept> extends JInternalFrame {
     
     public NATBrowserFrame(
             JFrame parentFrame, 
-            ConceptBrowserDataSource<T> dataSource, 
+            OAFStateFileManager stateFileManager,
+            ConceptBrowserDataSource<T> dataSource,
             NATLayout layout) {
         
         super("Ontology Abstraction Framework (OAF) Neighborhood Auditing Tool (NAT)", 
@@ -28,7 +30,7 @@ public class NATBrowserFrame<T extends Concept> extends JInternalFrame {
                 true,
                 false);
         
-        this.browser = new NATBrowserPanel<>(parentFrame, layout);
+        this.browser = new NATBrowserPanel<>(parentFrame, stateFileManager, layout);
         this.browser.setDataSource(dataSource);
         
         this.setSize(1400, 600);
