@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -230,5 +231,16 @@ public abstract class ResultListPanel<T extends Concept, V> extends ResultPanel<
     @Override
     public void reset() {
         this.dataPending();
+    }
+    
+    @Override
+    protected void reload() {
+        int scrollLocation = this.list.getVerticalScrollLocation();
+        
+        super.reload();
+        
+        SwingUtilities.invokeLater(() -> {
+            this.list.setVerticalScrollLocation(scrollLocation);
+        });
     }
 }

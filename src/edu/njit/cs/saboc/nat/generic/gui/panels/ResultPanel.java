@@ -1,6 +1,7 @@
 package edu.njit.cs.saboc.nat.generic.gui.panels;
 
 import edu.njit.cs.saboc.blu.core.ontology.Concept;
+import edu.njit.cs.saboc.nat.generic.FocusConceptManager.FocusConceptListener;
 import edu.njit.cs.saboc.nat.generic.NATBrowserPanel;
 import javax.swing.SwingUtilities;
 
@@ -39,15 +40,25 @@ public abstract class ResultPanel<T extends Concept, V> extends BaseNATPanel<T> 
         
         this.dataRetriever = dataRetriever;
         
-        mainPanel.getFocusConceptManager().addFocusConceptListener( (concept) -> {
-            this.loaded = false;
+        mainPanel.getFocusConceptManager().addFocusConceptListener(new FocusConceptListener<T>() {
             
-            if(isActive) {                
-                doLoad(concept);
+            @Override
+            public void focusConceptChanged(T concept) {
+                loaded = false;
+
+                if (isActive) {
+                    doLoad(concept);
+                }
+            }
+
+            @Override
+            public void reloadFocusConcept() {
+                reload();
             }
         });
         
         this.isActive = true;
+        
         this.loaded = false;
     }
     
@@ -60,6 +71,7 @@ public abstract class ResultPanel<T extends Concept, V> extends BaseNATPanel<T> 
     }
     
     private void doLoad(T concept) {
+        
         if(!isActive) {
             return;
         }
@@ -86,7 +98,7 @@ public abstract class ResultPanel<T extends Concept, V> extends BaseNATPanel<T> 
     /**
      * Reloads the data displayed in the result panel, if the panel is active
      */
-    protected void reload() {
+    protected void reload() {        
         doLoad(getMainPanel().getFocusConceptManager().getActiveFocusConcept());
     }
     

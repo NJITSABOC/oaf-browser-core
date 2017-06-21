@@ -22,13 +22,14 @@ public class FocusConceptManager<T extends Concept> {
      * 
      * @param <T> 
      */
-    public interface FocusConceptChangedListener<T extends Concept> {
+    public interface FocusConceptListener<T extends Concept> {
         public void focusConceptChanged(T concept);
+        public void reloadFocusConcept();
     }
     
     private final NATBrowserPanel<T> mainPanel;
     
-    private final ArrayList<FocusConceptChangedListener<T>> listeners = new ArrayList<>();
+    private final ArrayList<FocusConceptListener<T>> listeners = new ArrayList<>();
 
     private final FocusConceptHistory<T> history = new FocusConceptHistory<>();
     
@@ -42,11 +43,11 @@ public class FocusConceptManager<T extends Concept> {
         return history;
     }
     
-    public void addFocusConceptListener(FocusConceptChangedListener<T> fcl) {
+    public void addFocusConceptListener(FocusConceptListener<T> fcl) {
         listeners.add(fcl);
     }
     
-    public void removeFocusConceptListener(FocusConceptChangedListener<T> fcl) {
+    public void removeFocusConceptListener(FocusConceptListener<T> fcl) {
         listeners.remove(fcl);
     }
 
@@ -61,12 +62,14 @@ public class FocusConceptManager<T extends Concept> {
      * Reloads all panels for the current focus concept
      */
     public final void refresh() {
-        
-        if(!mainPanel.getDataSource().isPresent()) {
+
+        if (!mainPanel.getDataSource().isPresent()) {
             return;
         }
-        
-        navigateTo(this.getActiveFocusConcept(), false);
+
+        listeners.forEach((listener) -> {
+            listener.reloadFocusConcept();
+        });
     }
 
     public final void navigateTo(T concept) {

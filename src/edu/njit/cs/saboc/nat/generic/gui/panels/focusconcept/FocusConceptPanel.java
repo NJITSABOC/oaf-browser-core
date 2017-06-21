@@ -7,6 +7,7 @@ import edu.njit.cs.saboc.blu.core.utils.rightclickmanager.EntityRightClickMenuGe
 import edu.njit.cs.saboc.nat.generic.data.NATConceptSearchResult;
 import edu.njit.cs.saboc.nat.generic.history.FocusConceptHistory;
 import edu.njit.cs.saboc.nat.generic.FocusConceptManager;
+import edu.njit.cs.saboc.nat.generic.FocusConceptManager.FocusConceptListener;
 import edu.njit.cs.saboc.nat.generic.NATBrowserPanel;
 import edu.njit.cs.saboc.nat.generic.gui.panels.BaseNATPanel;
 import edu.njit.cs.saboc.nat.generic.gui.panels.focusconcept.EditFocusConceptPanel.EditFocusConceptListener;
@@ -272,8 +273,17 @@ public class FocusConceptPanel<T extends Concept> extends BaseNATPanel<T> {
         
         editorPane.setContentType("text/html");
         
-        mainPanel.getFocusConceptManager().addFocusConceptListener( (concept) -> {
-            display();
+        mainPanel.getFocusConceptManager().addFocusConceptListener(new FocusConceptListener<T>() {
+
+            @Override
+            public void focusConceptChanged(T concept) {
+                display();
+            }
+
+            @Override
+            public void reloadFocusConcept() {
+               
+            }
         });
         
         this.addOptionButton(new OpenBrowserButton(mainPanel, new GoogleSearchConfig()));

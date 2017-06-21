@@ -65,7 +65,9 @@ public class ErrorReportDialog {
             }
         });
         
-        dialog.setTitle(String.format("Report %s", initializer.getErrorTypeName()));
+        dialog.setTitle(String.format("Report %s on %s", 
+                initializer.getErrorTypeName(),
+                initializer.getErroneousConcept().getName()));
         
         dialog.add(errorReportPanel);
         

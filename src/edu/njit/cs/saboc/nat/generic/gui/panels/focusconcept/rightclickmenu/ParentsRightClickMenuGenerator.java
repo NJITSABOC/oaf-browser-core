@@ -43,7 +43,7 @@ public class ParentsRightClickMenuGenerator<T extends Concept> extends AuditRepo
             namePanel.add(Box.createHorizontalStrut(8), BorderLayout.WEST);
             namePanel.add(Box.createHorizontalStrut(8), BorderLayout.EAST);
             
-            JLabel nameLabel = new JLabel(item.getName());
+            JLabel nameLabel = new JLabel("Erroneous Parent: " + item.getName());
             nameLabel.setFont(nameLabel.getFont().deriveFont(16.0f));
             
             namePanel.setBackground(Color.WHITE);
@@ -59,9 +59,25 @@ public class ParentsRightClickMenuGenerator<T extends Concept> extends AuditRepo
 
             List<ParentError<T>> reportedParentErrors = auditSet.getParentErrors(focusConcept);
                         
-            if(!reportedParentErrors.isEmpty()) {
+            if (!reportedParentErrors.isEmpty()) {
                 components.add(new JSeparator());
-                
+
+                JPanel currentErrorsPanel = new JPanel(new BorderLayout());
+                currentErrorsPanel.add(Box.createHorizontalStrut(8), BorderLayout.WEST);
+                currentErrorsPanel.add(Box.createHorizontalStrut(8), BorderLayout.EAST);
+
+                JLabel currentErrorsLabel = new JLabel("Reported Errors");
+                currentErrorsLabel.setFont(nameLabel.getFont().deriveFont(16.0f));
+
+                currentErrorsPanel.setBackground(Color.WHITE);
+                currentErrorsPanel.setOpaque(true);
+
+                currentErrorsPanel.add(currentErrorsLabel, BorderLayout.CENTER);
+
+                components.add(currentErrorsPanel);
+
+                components.add(new JSeparator());
+
                 components.add(generateRemoveErrorMenu(auditSet, focusConcept, reportedParentErrors));
             }
 
@@ -80,11 +96,23 @@ public class ParentsRightClickMenuGenerator<T extends Concept> extends AuditRepo
 
             AuditSet<T> auditSet = mainPanel.getAuditDatabase().getLoadedAuditSet().get();
             T focusConcept = mainPanel.getFocusConceptManager().getActiveFocusConcept();
+            
+            JPanel otherErrorPanel = new JPanel(new BorderLayout());
+            JLabel nameLabel = new JLabel(" Other Error");
+            nameLabel.setFont(nameLabel.getFont().deriveFont(16.0f));
 
-            JMenuItem reportMissingParent = new JMenuItem("Report missing parent");
+            otherErrorPanel.setBackground(Color.WHITE);
+            otherErrorPanel.setOpaque(true);
+            otherErrorPanel.add(nameLabel, BorderLayout.CENTER);
+
+            JMenuItem reportMissingParent = new JMenuItem("Missing parent");
+            reportMissingParent.setFont(reportMissingParent.getFont().deriveFont(14.0f));
             reportMissingParent.addActionListener((ae) -> {
                 ErrorReportDialog.displayMissingParentDialog(mainPanel, focusConcept);
             });
+
+            components.add(otherErrorPanel);
+            components.add(new JSeparator());
 
             components.add(reportMissingParent);
 
