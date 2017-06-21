@@ -2,18 +2,25 @@ package edu.njit.cs.saboc.nat.generic.gui.panels.errorreporting.auditset;
 
 import edu.njit.cs.saboc.blu.core.gui.gep.panels.exportabn.ExportAbNUtilities;
 import edu.njit.cs.saboc.blu.core.ontology.Concept;
+import edu.njit.cs.saboc.blu.core.utils.comparators.ConceptNameComparator;
+import edu.njit.cs.saboc.blu.core.utils.filterable.list.FilterableList;
 import edu.njit.cs.saboc.blu.core.utils.toolstate.OAFRecentlyOpenedFileManager;
 import edu.njit.cs.saboc.blu.core.utils.toolstate.OAFRecentlyOpenedFileManager.RecentlyOpenedFileException;
 import edu.njit.cs.saboc.blu.core.utils.toolstate.RecentlyOpenedFile;
 import edu.njit.cs.saboc.nat.generic.NATBrowserPanel;
 import edu.njit.cs.saboc.nat.generic.data.ConceptBrowserDataSource;
+import edu.njit.cs.saboc.nat.generic.data.NATConceptSearchResult;
 import edu.njit.cs.saboc.nat.generic.errorreport.AuditSet;
 import edu.njit.cs.saboc.nat.generic.errorreport.AuditSetLoader;
 import edu.njit.cs.saboc.nat.generic.errorreport.AuditSetLoaderException;
+import edu.njit.cs.saboc.nat.generic.gui.filterable.list.FilterableSearchResultEntry;
+import edu.njit.cs.saboc.nat.generic.gui.filterable.list.renderer.SearchResultRenderer;
 import edu.njit.cs.saboc.nat.generic.gui.panels.BaseNATPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +40,7 @@ import javax.swing.JSeparator;
  * @param <T>
  */
 public class AuditSetPanel<T extends Concept> extends BaseNATPanel<T> {
-    
+
     private final AuditConceptList<T> auditConceptList;
     
     private final JLabel nameLabel;
@@ -182,13 +189,18 @@ public class AuditSetPanel<T extends Concept> extends BaseNATPanel<T> {
     
     private void setCurrentAuditSet(AuditSet<T> auditSet) {
         setLoadedAuditedSet(auditSet);
-        
-        
+
         getMainPanel().getAuditDatabase().setAuditSet(auditSet);
     }
     
     private void setLoadedAuditedSet(AuditSet<T> auditSet) {
-        this.auditConceptList.reloadAuditSet();
+
+        ArrayList<T> concepts = new ArrayList<>(auditSet.getConcepts());
+        concepts.sort(new ConceptNameComparator());
+
+        this.auditConceptList.displayResults(concepts);
+        
+        //this.auditConceptList.reloadAuditSet();
 
         displayDetails(auditSet);
     }

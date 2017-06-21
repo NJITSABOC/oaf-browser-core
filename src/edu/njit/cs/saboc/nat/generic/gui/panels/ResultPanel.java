@@ -70,7 +70,7 @@ public abstract class ResultPanel<T extends Concept, V> extends BaseNATPanel<T> 
         return isActive;
     }
     
-    private void doLoad(T concept) {
+    protected void doLoad(T concept) {
         
         if(!isActive) {
             return;

@@ -270,16 +270,18 @@ public class CommonBrowserDataRetrievers {
 
             @Override
             public ArrayList<T> getData(T concept) {
-                if(mainPanel.getAuditDatabase().getLoadedAuditSet().isPresent()) {
-                    
-                    ArrayList<T> concepts = new ArrayList<>(mainPanel.getAuditDatabase().getLoadedAuditSet().get().getConcepts());
-                    concepts.sort(new ConceptNameComparator());
-                    
-                    return concepts;
-                    
-                } else {
-                    return new ArrayList<>();
-                }
+//                if(mainPanel.getAuditDatabase().getLoadedAuditSet().isPresent()) {
+//                    
+//                    ArrayList<T> concepts = new ArrayList<>(mainPanel.getAuditDatabase().getLoadedAuditSet().get().getConcepts());
+//                    concepts.sort(new ConceptNameComparator());
+//                    
+//                    return concepts;
+//                    
+//                } else {
+//                    return new ArrayList<>();
+//                }
+                
+                return new ArrayList<>();
             }
 
             @Override

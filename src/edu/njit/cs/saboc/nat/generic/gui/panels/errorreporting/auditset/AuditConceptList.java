@@ -32,8 +32,17 @@ public class AuditConceptList<T extends Concept> extends ConceptListPanel<T> {
     protected Filterable<T> createFilterableEntry(T entry) {
         return new FilterableAuditSetEntry<>(getMainPanel(), entry);
     }
-    
+        
     public void reloadAuditSet() {
         super.forceReload();
+    }
+    
+    /**
+     * Hack to prevent audit set from loading each time navigate is called
+     * 
+     * @param concept 
+     */
+    protected void doLoad(T concept) {
+        
     }
 }
